@@ -1,0 +1,43 @@
+
+------------------------------------------------------------------------
+  LedgerFlow -- Reconciliation Run Summary
+  Run timestamp : 2026-08-25T15:48:22.968257Z
+------------------------------------------------------------------------
+
+  RECORD COUNTS
+    Total ERP records evaluated  :    100
+    MATCHED (auto-reconciled)     :     92  (92.0%)
+    REVIEW  (AI-assisted, pending):      1  (1.0%)
+    EXCEPTION (escalated queue)   :      7  (7.0%)
+
+  STAGE BREAKDOWN
+    Stage-1 (Deterministic Core)  :     98 rows
+    Stage-2 (AI Fallback)          :      2 rows
+
+  Match rate (MATCHED only)       : 92.0%
+  Average confidence score        : 98.7 / 100
+
+  SUB-STATUS BREAKDOWN
+    EXACT_MATCH                         :   92 row(s)
+    MISSING_GATEWAY                     :    3 row(s)
+    MAJOR_FEE_VARIANCE                  :    2 row(s)
+    MISSING_BANK                        :    2 row(s)
+    MINOR_FEE_VARIANCE                  :    1 row(s)
+
+  FINANCIAL SUMMARY (INR)
+    Total ERP Gross              : INR       7,578,973.78
+    Total Gateway Net Settled    : INR       7,273,753.05
+    Total Bank Credits Matched   : INR       6,880,781.68
+    Reconciled Net (MATCHED)     : INR       6,836,093.39
+
+  EXCEPTION QUEUE SUMMARY
+    MISSING_GATEWAY                     :    3 row(s)
+    MAJOR_FEE_VARIANCE                  :    2 row(s)
+    MISSING_BANK                        :    2 row(s)
+
+  OUTPUT FILES
+    reconciliation_report.csv    : data\output\reconciliation_report.csv
+    exception_queue.csv          : data\output\exception_queue.csv
+    audit_trail.jsonl            : data\output\audit_trail.jsonl
+
+------------------------------------------------------------------------

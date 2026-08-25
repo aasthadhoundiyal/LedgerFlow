@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LedgerFlow Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            safelist: [
+                'bg-emerald-600',
+                'bg-amber-500',
+                'bg-rose-600',
+                'bg-slate-700',
+                'text-white'
+            ]
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4f46e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-slate-900" style="opacity: 0; transition: opacity 0.3s ease-in;" id="appBody">
+
+    <!-- Top Navigation -->
+    <nav class="bg-indigo-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <svg class="w-8 h-8 object-contain flex-shrink-0 text-white" width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Dual-ledger data convergence -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7L7 12L9 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17L7 12" />
+                        <!-- AI/Engine Reconciliation Node -->
+                        <circle cx="11" cy="12" r="2" stroke-width="2" />
+                        <!-- Final validation checkmark -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12L17 14L21 10" />
+                    </svg>
+                    <span class="font-bold text-xl ml-2">LedgerFlow</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden flex flex-col items-center justify-center py-20">
+            <div class="spinner mb-4"></div>
+            <p class="text-slate-500 font-medium">Reconciling records...</p>
+        </div>
+
+        <div id="dashboardContent" class="fade-in hidden">
+            <!-- Header Actions -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-slate-900">Reconciliation Dashboard</h1>
+                <button id="toggleUploadBtn" class="bg-white hover:bg-indigo-50 text-indigo-600 px-4 py-2 rounded-md text-sm font-semibold transition border border-slate-200 shadow-sm">
+                    Upload Custom Files
+                </button>
+            </div>
+
+            <!-- File Upload Section -->
+            <div id="uploadSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 hidden fade-in">
+                <h2 class="text-lg font-semibold text-slate-900 mb-4">Upload Data Files</h2>
+                <form id="uploadForm" class="flex flex-col md:flex-row gap-4 items-end">
+                    <div class="flex-1 w-full">
+                        <label for="erpFile" class="block text-sm font-medium text-slate-700 mb-1">ERP Ledger (CSV)</label>
+                        <input type="file" id="erpFile" name="erp_ledger" accept=".csv" required
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-200 rounded-md">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label for="gwFile" class="block text-sm font-medium text-slate-700 mb-1">Gateway Settlement (CSV)</label>
+                        <input type="file" id="gwFile" name="gateway_settlement" accept=".csv" required
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-200 rounded-md">
+                    </div>
+                    <div class="flex-1 w-full">
+                        <label for="bankFile" class="block text-sm font-medium text-slate-700 mb-1">Bank Statement (CSV)</label>
+                        <input type="file" id="bankFile" name="bank_statement" accept=".csv" required
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-200 rounded-md">
+                    </div>
+                    <div>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 shadow-sm whitespace-nowrap h-10">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Run Reconciliation
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Metrics Row -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Total Processed -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Total Processed</span>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="metricTotal" class="text-4xl font-bold text-slate-900">-</span>
+                        <span class="text-sm font-medium text-slate-400">records</span>
+                    </div>
+                </div>
+
+                <!-- Match Rate -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Match Rate</span>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="metricMatchRate" class="text-4xl font-bold text-emerald-600">-</span>
+                        <span class="text-sm font-medium text-slate-400">%</span>
+                    </div>
+                </div>
+
+                <!-- Exception Count -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <span class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Exception Count</span>
+                    <div class="mt-2 flex items-baseline gap-2">
+                        <span id="metricExceptions" class="text-4xl font-bold text-rose-600">-</span>
+                        <span class="text-sm font-medium text-slate-400">needs review</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Status Split Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-80">
+                    <h2 class="text-sm font-semibold text-slate-900 mb-4">Reconciliation Status Split</h2>
+                    <div class="flex-1 relative w-full h-full flex justify-center items-center">
+                        <canvas id="statusSplitChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Volume Metrics Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-80">
+                    <h2 class="text-sm font-semibold text-slate-900 mb-4">Processing Volume</h2>
+                    <div class="flex-1 relative w-full h-full">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Grid: Exception Queue (Left) & Audit Trail (Right) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Exception Queue Panel (1 column) -->
+                <div class="lg:col-span-1 flex flex-col h-[600px]">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <h2 class="text-lg font-semibold text-slate-900">Exception Queue</h2>
+                            <span id="exceptionBadge" class="bg-rose-100 text-rose-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">0</span>
+                        </div>
+                        <div class="p-4 overflow-y-auto flex-1 bg-slate-50" id="exceptionList">
+                            <!-- Exceptions will be injected here -->
+                            <div class="text-sm text-slate-500 text-center mt-10" id="noExceptionsMsg">No exceptions found.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Table (2 columns) -->
+                <div class="lg:col-span-2 flex flex-col h-[600px]">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-200">
+                            <h2 class="text-lg font-semibold text-slate-900">Audit Trail</h2>
+                        </div>
+                        <div class="overflow-x-auto flex-1 relative">
+                            <table class="w-full text-sm text-left text-slate-600">
+                                <thead class="text-xs text-slate-500 uppercase bg-slate-50 sticky top-0">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 font-semibold">Transaction ID</th>
+                                        <th scope="col" class="px-6 py-3 font-semibold">Decision (Sub-Status)</th>
+                                        <th scope="col" class="px-6 py-3 font-semibold">Status</th>
+                                        <th scope="col" class="px-6 py-3 font-semibold">Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditTrailBody" class="divide-y divide-slate-100">
+                                    <!-- Audit records will be injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/api';
+        
+        let statusChartInstance = null;
+        let volumeChartInstance = null;
+
+        const updateCharts = (data) => {
+            const counts = data.summary.record_counts;
+            
+            // Status Split Doughnut Chart
+            const statusCtx = document.getElementById('statusSplitChart').getContext('2d');
+            const statusData = {
+                labels: ['Auto-Reconciled', 'AI-Assisted', 'Exceptions'],
+                datasets: [{
+                    data: [counts.matched, counts.review, counts.exception],
+                    backgroundColor: ['#059669', '#f59e0b', '#e11d48'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            };
+
+            if (statusChartInstance) {
+                statusChartInstance.data = statusData;
+                statusChartInstance.update();
+            } else {
+                statusChartInstance = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: statusData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        },
+                        cutout: '70%'
+                    }
+                });
+            }
+
+            // Volume Bar Chart
+            const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+            const volumeData = {
+                labels: ['Total Processed', 'Matched', 'Exceptions'],
+                datasets: [{
+                    label: 'Transaction Volume',
+                    data: [counts.total, counts.matched, counts.exception],
+                    backgroundColor: ['#4f46e5', '#059669', '#e11d48'],
+                    borderRadius: 4,
+                }]
+            };
+
+            if (volumeChartInstance) {
+                volumeChartInstance.data = volumeData;
+                volumeChartInstance.update();
+            } else {
+                volumeChartInstance = new Chart(volumeCtx, {
+                    type: 'bar',
+                    data: volumeData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        };
+        
+        const formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+        };
+
+        const getStatusBadge = (status) => {
+            switch(status) {
+                case 'MATCHED': return '<span class="bg-emerald-600 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">MATCHED</span>';
+                case 'EXCEPTION': return '<span class="bg-rose-600 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">EXCEPTION</span>';
+                case 'REVIEW': return '<span class="bg-amber-500 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">REVIEW</span>';
+                default: return `<span class="bg-slate-700 text-white text-xs font-semibold px-2.5 py-1 rounded-md shadow-sm">${status}</span>`;
+            }
+        };
+
+        const renderExceptionCard = (exc) => {
+            return `
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-rose-200 mb-3 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-mono text-xs font-semibold text-slate-700">${exc.erp_txn_id}</span>
+                        <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">${exc.sub_status}</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-2 line-clamp-3">${exc.reasoning}</p>
+                    <div class="flex justify-between items-end mt-2 pt-2 border-t border-slate-200">
+                        <div class="text-[10px] text-slate-400">Net Delta</div>
+                        <div class="text-xs font-semibold text-slate-700">${formatCurrency(exc.net_delta || 0)}</div>
+                    </div>
+                </div>
+            `;
+        };
+
+        const renderAuditRow = (record) => {
+            return `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 font-mono font-medium text-slate-700 whitespace-nowrap">${record.erp_txn_id}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-medium text-slate-900">${record.sub_status}</div>
+                        <div class="text-xs text-slate-500 mt-0.5 max-w-xs truncate" title="${record.reasoning}">${record.reasoning}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${getStatusBadge(record.status)}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold ${record.confidence > 90 ? 'text-emerald-600' : (record.confidence > 70 ? 'text-amber-600' : 'text-rose-600')}">${record.confidence}%</span>
+                            <div class="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                                <div class="h-full ${record.confidence > 90 ? 'bg-emerald-500' : (record.confidence > 70 ? 'bg-amber-500' : 'bg-rose-500')}" style="width: ${record.confidence}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        };
+
+        const updateDashboard = (data) => {
+            // Update Metrics
+            document.getElementById('metricTotal').textContent = data.summary.record_counts.total;
+            document.getElementById('metricMatchRate').textContent = data.summary.rates.match_rate_pct.toFixed(1);
+            document.getElementById('metricExceptions').textContent = data.summary.record_counts.exception;
+            
+            // Update Exception Queue
+            const excList = document.getElementById('exceptionList');
+            document.getElementById('exceptionBadge').textContent = data.summary.record_counts.exception;
+            
+            if (data.exception_queue && data.exception_queue.length > 0) {
+                excList.innerHTML = data.exception_queue.map(renderExceptionCard).join('');
+            } else {
+                excList.innerHTML = '<div class="text-sm text-slate-500 text-center mt-10">No exceptions found.</div>';
+            }
+
+            // Update Audit Trail
+            const auditBody = document.getElementById('auditTrailBody');
+            if (data.audit_trail && data.audit_trail.length > 0) {
+                auditBody.innerHTML = data.audit_trail.map(renderAuditRow).join('');
+            } else {
+                auditBody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-500">No audit records available.</td></tr>';
+            }
+
+            // Update Charts
+            updateCharts(data);
+        };
+
+        const fetchInitialData = async () => {
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            try {
+                // Initial load with static mock data
+                const response = await fetch(`${API_BASE}/reconcile`, { method: 'POST' });
+                if (!response.ok) {
+                    throw new Error(`Backend not ready or failed: ${response.status}`);
+                }
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.warn("Initial load skipped/failed. Falling back to empty state.", error);
+                // Fallback default state
+                updateDashboard({
+                    summary: {
+                        record_counts: { total: 0, matched: 0, review: 0, exception: 0 },
+                        rates: { match_rate_pct: 0 }
+                    },
+                    exception_queue: [],
+                    audit_trail: []
+                });
+            } finally {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('loadingState').classList.remove('hidden');
+            
+            try {
+                const formData = new FormData(e.target);
+                const response = await fetch(`${API_BASE}/upload-and-reconcile`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.detail?.message || `Upload failed: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                updateDashboard(data);
+                document.getElementById('uploadSection').classList.add('hidden');
+                
+            } catch (error) {
+                console.error("Upload error:", error);
+                alert(error.message);
+            } finally {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+            }
+        });
+
+        // Prevent FOUC: fade in body after Tailwind parses and assets load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('appBody').style.opacity = '1';
+            }, 50);
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', fetchInitialData);
+
+        // Toggle Upload Section
+        document.getElementById('toggleUploadBtn').addEventListener('click', () => {
+            const uploadSection = document.getElementById('uploadSection');
+            uploadSection.classList.toggle('hidden');
+        });
+
+    </script>
+</body>
+</html>

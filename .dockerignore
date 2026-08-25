@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .dockerignore — LedgerFlow
+# Keeps the build context lean by excluding files that don't belong in the
+# container image.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Generated / output data — mount via -v at runtime instead
+data/
+
+# Frontend (not part of the backend image)
+index.html
+
+# Dev & startup scripts
+start.sh
+start.ps1
+test_api.py
+README.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pycache
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Editor / OS artifacts
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+.gitattributes
