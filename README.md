@@ -8,9 +8,7 @@
 
 ## 🎥 Demo Video
 
-**👉 [Watch the 5-Minute Demo on Loom](https://your-loom-link-here.com)**
-
-> *Replace the link above with your actual Loom recording URL before submitting.*
+**👉 [Watch the 5-Minute Demo on Loom](https://www.loom.com/share/dee4d4c6c24f4a3e9f06bb171a842575)**
 
 ---
 
