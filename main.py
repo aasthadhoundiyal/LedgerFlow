@@ -481,7 +481,7 @@ def _validate_and_load_upload(
     # Parse
     import io
     try:
-        df = pd.read_csv(io.BytesIO(raw_bytes), dtype=str)
+        df = pd.read_csv(io.BytesIO(raw_bytes), dtype=str, encoding="utf-8-sig")
     except Exception as exc:
         raise HTTPException(
             status_code=422,
@@ -492,7 +492,7 @@ def _validate_and_load_upload(
             },
         )
 
-    df.columns = df.columns.str.strip()
+    df.columns = df.columns.str.replace('\ufeff', '', regex=False).str.strip().str.lower().str.replace(r'[\s\-]+', '_', regex=True)
 
     # Required-column validation
     required = _REQUIRED_COLS.get(field_name, [])
@@ -629,21 +629,37 @@ async def upload_and_reconcile(
             "audit_trail":     audit,
         })
 
-    except HTTPException:
-        raise   # pass validation errors through unchanged
+    except HTTPException as exc:
+        log.warning("POST /api/upload-and-reconcile [%s] — validation error: %s", run_id, exc.detail)
+        return JSONResponse(content={
+            "ok": False,
+            "run_id": run_id,
+            "source": "uploaded_files",
+            "summary": {
+                "record_counts": {"total": 0, "matched": 0, "review": 0, "exception": 0},
+                "rates": {"match_rate_pct": 0, "review_rate_pct": 0, "exception_rate_pct": 0}
+            },
+            "exception_queue": [],
+            "audit_trail": [],
+            "error_detail": exc.detail
+        })
 
     except Exception as exc:
         log.exception(
             "POST /api/upload-and-reconcile [%s] — engine error: %s", run_id, exc
         )
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error":   "ENGINE_ERROR",
-                "run_id":  run_id,
-                "message": str(exc),
+        return JSONResponse(content={
+            "ok": False,
+            "run_id": run_id,
+            "source": "uploaded_files",
+            "summary": {
+                "record_counts": {"total": 0, "matched": 0, "review": 0, "exception": 0},
+                "rates": {"match_rate_pct": 0, "review_rate_pct": 0, "exception_rate_pct": 0}
             },
-        )
+            "exception_queue": [],
+            "audit_trail": [],
+            "error_detail": {"message": f"Engine error: {exc}"}
+        })
 
     finally:
         # ── 5. Always clean up the temp directory ─────────────────────────
