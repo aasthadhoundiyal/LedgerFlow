@@ -2,7 +2,41 @@
 
 **Track 4: AI Finance Controller — Razorpay AI Buildathon 2026**
 
-> A production-grade, two-stage financial reconciliation engine that resolves multi-source discrepancies across ERP ledgers, payment gateway settlements, and bank statements — with a full audit trail and a human-in-the-loop exception queue.
+> An intelligent, automated financial reconciliation dashboard that eliminates manual matching bottlenecks across ERP ledgers, payment gateway settlements, and bank statements — with real-time metrics, a full audit trail, and a human-in-the-loop exception queue.
+
+---
+
+## 🎥 Demo Video
+
+**👉 [Watch the 5-Minute Demo on Loom](https://your-loom-link-here.com)**
+
+> *Replace the link above with your actual Loom recording URL before submitting.*
+
+---
+
+## ✨ What is LedgerFlow?
+
+Finance teams at high-growth companies spend **days every month** manually reconciling three disconnected data sources:
+
+| Source | Description |
+|---|---|
+| **ERP Ledger** | Internal accounting records (invoices, expected net payables) |
+| **Gateway Settlement** | Razorpay settlement reports (actual fees deducted, UTR numbers) |
+| **Bank Statement** | Raw bank credits (narrations, value dates, running balances) |
+
+**LedgerFlow automates this entirely.** Upload your three CSVs, and within seconds the dashboard surfaces your match rate, flags every exception with a confidence score and plain-English reasoning, and gives you a complete audit trail — ready for regulatory review.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend API** | Python · FastAPI · Uvicorn |
+| **Reconciliation Engine** | Pandas · Custom two-stage deterministic + AI-assisted pipeline |
+| **Frontend Dashboard** | Vanilla HTML/JS · Tailwind CSS · Chart.js |
+| **Data Format** | CSV (UTF-8 / Excel BOM-safe) |
+| **Containerisation** | Docker · Docker Compose |
 
 ---
 

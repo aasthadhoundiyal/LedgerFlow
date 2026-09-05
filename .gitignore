@@ -1,0 +1,52 @@
+﻿# == Python ==
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# == Virtual Environments ==
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# == Distribution / Packaging ==
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# == Testing and Coverage ==
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# == Environment and Secrets ==
+.env
+.env.*
+*.env
+secrets.py
+
+# == IDE / Editor ==
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# == LedgerFlow - Generated Output ==
+data/output/
+data/demo/
+
+# == Temp files ==
+*.tmp
+*.bak
+*.log
+ledgerflow_*.tmp/
