@@ -50,3 +50,6 @@ data/demo/
 *.bak
 *.log
 ledgerflow_*.tmp/
+
+# == LedgerFlow - Mock Input Data (regenerate with generate_mock_data.py) ==
+data/mock/
